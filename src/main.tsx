@@ -17,7 +17,7 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    {/* Wrap your entire App with MsalProvider */}
+    
     <MsalProvider instance={msalInstance}>
       <App />
     </MsalProvider>
