@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { apiClient } from '../api/apiClient';
+import { apiClient } from '../../../api/apiClient';
 import TicketForm from '../components/TicketForm';
 
-import { useTickets } from '../contexts/TicketContext';
-import { Ticket } from '../types/ticket';
+import { useTickets } from '../context/TicketContext';
+import { Ticket } from '../type';
 
 export default function TicketDetailView() {
   const { id } = useParams<{ id: string }>(); 
@@ -53,7 +53,7 @@ export default function TicketDetailView() {
     <div>
       {!activeTicketId &&
         <div style={{ background: '#fff', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Link to="/" style={{ color: '#3498db', textDecoration: 'none' }}>&larr; Back to Operational Dashboard</Link>
+          <Link to="/" style={{ color: '#3498db', textDecoration: 'none' }}>&larr; Back to Dashboard</Link>
           <h2 style={{ marginTop: '15px' }}>Job Analysis Profile #{id} &nbsp;
             <button onClick={() => { openForm(ticket.id) }} style={{ marginRight: '10px', padding: '6px 12px', background: '#f39c12', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Edit</button>
           </h2>

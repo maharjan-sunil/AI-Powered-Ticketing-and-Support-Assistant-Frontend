@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
-import { apiClient } from '../api/apiClient';
+import { apiClient } from '../../../api/apiClient';
 
-import { Ticket} from '../types/ticket';
+import { Ticket} from '../type';
 
 
 interface ReducerState {
