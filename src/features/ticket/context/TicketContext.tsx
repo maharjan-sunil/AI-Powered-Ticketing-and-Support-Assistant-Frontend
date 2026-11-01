@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
+import {toast} from 'react-hot-toast';
+
 import { apiClient } from '../../../api/apiClient';
 
-// import { useNavigate } from 'react-router-dom';
 import { Ticket} from '../type';
 
 
@@ -26,7 +27,6 @@ interface TicketContextType {
   dispatch: React.Dispatch<ReducerAction>;
 }
 
-// const navigate = useNavigate();
 
 const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
@@ -103,10 +103,10 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
     try {
       await apiClient.patch(`/ticket`, updateTicket).then((response) =>{
         if(response.status === 200)
-          console.log("updated");
+          toast.success("Ticket updated successfully!");
       })
     } catch (error) {
-      console.error("Error updating ticket:", error);
+      toast.error("Failed to update ticket.");  
     }
   };
 
@@ -125,16 +125,15 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
 
   try {
     await apiClient.delete(`/ticket/${ticketId}`);
+    toast.success("Ticket deleted successfully!");
   } catch (error) {
-
-    alert("Failed to delete. Restoring item.");
-
+    toast.error("Failed to delete. Restoring item.");
     setTickets(originalTickets);
   }
 };
 
 
-  // Action: Update Status
+  // Action: Update Status of the Ticket
   const handleUpdateStatus = (ticketId : string) => {
     setTickets((prev) =>
       prev.map((t) => (t.id === ticketId ? { ...t, status: 'Resolved' } : t))

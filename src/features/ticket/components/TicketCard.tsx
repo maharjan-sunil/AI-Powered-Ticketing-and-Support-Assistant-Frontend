@@ -1,5 +1,5 @@
-
 import { Link } from 'react-router-dom';
+
 import { TicketCardProps } from '../type';
 
 export default function TicketCard({
@@ -7,6 +7,7 @@ export default function TicketCard({
   onUpdateStatus,
   onDeleteTicket,
 }: TicketCardProps) {
+  
   const { id, description, ticketNumber, user, status, priority } = ticket;
 
   const priorityStyles: Record<string, string> = {
