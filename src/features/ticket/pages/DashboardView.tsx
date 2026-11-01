@@ -1,27 +1,13 @@
-
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { useTickets } from '../context/TicketContext';
 import TicketSearch, {
   type StatusFilter,
 } from '../components/TicketSearch';
-
-import { useNavigate } from 'react-router-dom';
-
 import TicketForm from '../components/TicketForm';
+import {DisplayTicket, StatCardProps} from '../type';
 
-
-type DisplayTicket = {
-  id: string | number;
-  ticketNumber?: string;
-  title?: string; 
-  description?: string;
-  user?: string | { name?: string; email?: string };
-  status?: string;
-  priority?: string;
-  category?: string | { name?: string };
-  createdAt?: string;
-  createdDate?: string;
-};
 
 export default function DashboardView() {
   const { tickets, isLoading, error, deleteTicket } = useTickets();
@@ -324,13 +310,7 @@ export default function DashboardView() {
   );
 }
 
-type StatCardProps = {
-  title: string;
-  count: number;
-  icon: string;
-  iconStyle: string;
-  cardStyle: string;
-};
+
 
 function StatCard({
   title,

@@ -9,11 +9,24 @@ export interface Ticket {
   createdDate? : string
 }
 
+export type DisplayTicket = {
+  id: string | number;
+  ticketNumber?: string;
+  title?: string; 
+  description?: string;
+  user?: string | { name?: string; email?: string };
+  status?: string;
+  priority?: string;
+  category?: string | { name?: string };
+  createdAt?: string;
+  createdDate?: string;
+};
+
 export interface TicketFormData {
-  jobTitle: string;
-  user: string;
-  status: 'Open' | 'In Progress' |'Resolved' | 'Closed';
-  priority: 'Low' | 'Medium' | 'High';
+  description: string;
+  user?: string;
+  status?: 'Open' | 'In Progress' |'Resolved' | 'Closed';
+  priority?: 'Low' | 'Medium' | 'High';
 }
 
 export interface TicketFormProps {
@@ -28,3 +41,11 @@ export interface TicketCardProps {
   onUpdateStatus: (id: string) => void;
   onDeleteTicket: (id: string) => void;
 }
+
+export type StatCardProps = {
+  title: string;
+  count: number;
+  icon: string;
+  iconStyle: string;
+  cardStyle: string;
+};

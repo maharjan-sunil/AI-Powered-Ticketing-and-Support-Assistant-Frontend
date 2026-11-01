@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+
 import { apiClient } from '../../../api/apiClient';
 import TicketForm from '../components/TicketForm';
-
 import { useTickets } from '../context/TicketContext';
 import { Ticket } from '../type';
 
 export default function TicketDetailView() {
+
   const { id } = useParams<{ id: string }>(); 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-
   const { isLoading, error, dispatch } = useTickets();
 
   useEffect(() => {
@@ -47,7 +47,9 @@ export default function TicketDetailView() {
   if (isLoading) return <div>⏳ Loading tickets, please wait...</div>;
   if (error) return <div>❌ Error: {error}</div>;
 
-  if (!ticket) return <p>System Profile Error: Target ID {id} not found. <Link to="/">Return home</Link></p>;
+  if (!ticket) return 
+    <p>System Profile Error: Target ID {id} not found. 
+  <Link to="/">Return home</Link></p>;
 
   return (
     <div>

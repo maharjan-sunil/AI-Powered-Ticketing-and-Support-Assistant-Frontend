@@ -5,6 +5,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+import { Toaster } from 'react-hot-toast';
+
 import AdminLayout from './components/layout/AdminLayout';
 import DashboardView from './features/ticket/pages/DashboardView';
 import TicketDetailView from './features/ticket/pages/TicketDetailView';
@@ -17,7 +19,6 @@ export default function App() {
     <BrowserRouter>
       <TicketProvider>
         <Routes>
-
           <Route element={<AdminLayout />}>
             <Route path="/" element={<DashboardView />} />
             <Route
@@ -31,6 +32,10 @@ export default function App() {
           />
         </Routes>
       </TicketProvider>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+      />
     </BrowserRouter>
   );
 }

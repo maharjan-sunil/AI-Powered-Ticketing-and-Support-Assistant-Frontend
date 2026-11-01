@@ -1,30 +1,30 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
 import { useTickets } from '../context/TicketContext';
-import { TicketFormProps } from '../type';
+import { TicketFormProps, TicketFormData } from '../type';
 
 export default function TicketForm({
-  inputRef,
   isEditMode = false,
   initialData = null,
   onSuccess,
 }: TicketFormProps) {
-  const [title, setTitle] = useState('');
+
+  const { register, handleSubmit, formState: { errors } } = useForm<TicketFormData>({ mode: 'all' });
+  const [description, setDescription] = useState('');
   const { addTicket, updateTicket } = useTickets();
 
-  // Fill the field when editing, empty it when switching back to create
+
   useEffect(() => {
-    setTitle(isEditMode && initialData ? initialData.description : '');
+    setDescription(isEditMode && initialData ? initialData.description : '');
   }, [isEditMode, initialData]);
 
   const handleClear = () => {
-    console.log(`call from ${isEditMode}`);
-    // In edit mode, "Reset" goes back to the saved value
-    setTitle(isEditMode && initialData ? initialData.description : '');
+    setDescription(isEditMode && initialData ? initialData.description : '');
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const value = title.trim();
+  const handleSubmitData = (data: TicketFormData) => {
+    const value = data.description.trim();
     if (!value) return;
 
     if (isEditMode && initialData) {
@@ -32,7 +32,7 @@ export default function TicketForm({
       onSuccess?.(value);
     } else {
       addTicket(value);
-      setTitle('');
+      setDescription('');
     }
   };
 
@@ -60,37 +60,48 @@ export default function TicketForm({
 
       {/* Form */}
       <form
-        onSubmit={handleSubmit}
-        className="flex w-full flex-col gap-3 sm:flex-row sm:items-center"
+        onSubmit={handleSubmit(handleSubmitData)}
+        className="flex w-full flex-col gap-3"
       >
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Enter job status/alert title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          aria-label="Ticket title"
-          required
-          className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-        />
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
+          <input
+            {...register('description', { required: true })}
+            type="text"
+            placeholder="Enter ticket description..."
+            value={description}
+            name="description"
+            onChange={(e) => {
+              register('description').onChange(e);
+              setDescription(e.target.value);     
+            }}
+            aria-label="Ticket description"
+            className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          />
 
-        <button
-          type="submit"
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          <span className="text-lg leading-none" aria-hidden="true">
-            {isEditMode ? '✓' : '+'}
-          </span>
-          {isEditMode ? 'Update Ticket' : 'Create Ticket'}
-        </button>
+          <button
+            type="submit"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <span className="text-lg leading-none" aria-hidden="true">
+              {isEditMode ? '✓' : '+'}
+            </span>
+            {isEditMode ? 'Update Ticket' : 'Create Ticket'}
+          </button>
 
-        <button
-          type="button"
-          onClick={handleClear}
-          className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-        >
-          {isEditMode ? 'Reset' : 'Clear'}
-        </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+          >
+            {isEditMode ? 'Reset' : 'Clear'}
+          </button>
+        </div>
+
+        {errors.description && (
+          <p className="w-full text-sm text-red-500 font-medium pl-1 mt-1">
+            Description is required
+          </p>
+        )}
       </form>
     </section>
   );
