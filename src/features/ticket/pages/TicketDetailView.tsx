@@ -16,7 +16,7 @@ export default function TicketDetailView() {
   useEffect(() => {
     dispatch({ type: 'FETCH_TICKETS' });
 
-    apiClient.get(`product/${id}`)
+    apiClient.get(`ticket/search?ticketId=${id}`)
       .then((response) => {
         setTicket(response.data);
         dispatch({ type: 'PROCESSING_COMPLETED' });
@@ -38,7 +38,7 @@ export default function TicketDetailView() {
       if (!prevTicket) return null; 
       return {
         ...prevTicket, 
-        jobTitle: updatedTitle
+        description: updatedTitle
       };
     });
     setActiveTicketId(null);
@@ -54,15 +54,15 @@ export default function TicketDetailView() {
       {!activeTicketId &&
         <div style={{ background: '#fff', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <Link to="/" style={{ color: '#3498db', textDecoration: 'none' }}>&larr; Back to Dashboard</Link>
-          <h2 style={{ marginTop: '15px' }}>Job Analysis Profile #{id} &nbsp;
+          <h2 style={{ marginTop: '15px' }}>Ticket #{ticket.ticketNumber} &nbsp;
             <button onClick={() => { openForm(ticket.id) }} style={{ marginRight: '10px', padding: '6px 12px', background: '#f39c12', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Edit</button>
           </h2>
           <hr />
           <div style={{ lineHeight: '1.8' }}>
-            <p><strong>Job Title:</strong> {ticket.jobTitle}</p>
+            <p><strong>Message:</strong> {ticket.description}</p>
             <p><strong>Assigned Engineer:</strong> {ticket.user || 'Unassigned'}</p>
-            <p><strong>Current Lifecycle State:</strong> <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#e0f7fa' }}>{ticket.status}</span></p>
-            <p><strong>Priority Tier:</strong> {ticket.priority}</p>
+            <p><strong>Status:</strong> <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#e0f7fa' }}>{ticket.status}</span></p>
+            <p><strong>Priority:</strong> {ticket.priority}</p>
           </div>
         </div>}
       <div>

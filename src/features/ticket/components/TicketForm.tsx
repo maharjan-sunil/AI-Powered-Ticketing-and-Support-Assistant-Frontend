@@ -13,13 +13,13 @@ export default function TicketForm({
 
   // Fill the field when editing, empty it when switching back to create
   useEffect(() => {
-    setTitle(isEditMode && initialData ? initialData.jobTitle : '');
+    setTitle(isEditMode && initialData ? initialData.description : '');
   }, [isEditMode, initialData]);
 
   const handleClear = () => {
     console.log(`call from ${isEditMode}`);
     // In edit mode, "Reset" goes back to the saved value
-    setTitle(isEditMode && initialData ? initialData.jobTitle : '');
+    setTitle(isEditMode && initialData ? initialData.description : '');
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,7 +28,7 @@ export default function TicketForm({
     if (!value) return;
 
     if (isEditMode && initialData) {
-      updateTicket(initialData.id, { jobTitle: value });
+      updateTicket(initialData.id, { description: value });
       onSuccess?.(value);
     } else {
       addTicket(value);

@@ -7,7 +7,7 @@ export default function TicketCard({
   onUpdateStatus,
   onDeleteTicket,
 }: TicketCardProps) {
-  const { id, jobTitle, user, status, priority } = ticket;
+  const { id, description, ticketNumber, user, status, priority } = ticket;
 
   const priorityStyles: Record<string, string> = {
     High: 'bg-red-50 text-red-700 ring-red-200',
@@ -30,11 +30,11 @@ export default function TicketCard({
             to={`/ticket/${id}`}
             className="text-base font-semibold text-slate-800 transition hover:text-blue-600"
           >
-            {jobTitle}
+            {description}
           </Link>
 
           <p className="mt-2 text-sm text-slate-500">
-            Ticket ID: <span className="font-medium text-slate-700">{id}</span>
+            Ticket Number: <span className="font-medium text-slate-700">{ticketNumber}</span>
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export default function TicketCard({
           <button
             type="button"
             onClick={() => {
-              if (window.confirm(`Are you sure you want to delete "${jobTitle}"?`)) {
+              if (window.confirm(`Are you sure you want to delete "${ticketNumber}"?`)) {
                 onDeleteTicket(id);
               }
             }}
