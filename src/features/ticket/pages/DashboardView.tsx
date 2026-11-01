@@ -1,5 +1,5 @@
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTickets } from '../context/TicketContext';
 import TicketSearch, {
   type StatusFilter,
@@ -9,9 +9,12 @@ import { useNavigate } from 'react-router-dom';
 
 import TicketForm from '../components/TicketForm';
 
+
 type DisplayTicket = {
   id: string | number;
-  jobTitle?: string;
+  ticketNumber?: string;
+  title?: string; 
+  description?: string;
   user?: string | { name?: string; email?: string };
   status?: string;
   priority?: string;
@@ -21,15 +24,15 @@ type DisplayTicket = {
 };
 
 export default function DashboardView() {
-  const { tickets, isLoading, error } = useTickets();
+  const { tickets, isLoading, error, deleteTicket } = useTickets();
 
-  const createTicketRef = useRef<HTMLElement | null>(null);
+  // const createTicketRef = useRef<HTMLElement | null>(null);
   const navigate = useNavigate();
 
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('All');
 
-  const formInputRef = useRef<HTMLInputElement | null>(null);
+  // const formInputRef = useRef<HTMLInputElement | null>(null);
 
   const ticketStats = useMemo(
     () => ({
@@ -70,7 +73,7 @@ export default function DashboardView() {
 
       const searchableText = [
         item.id,
-        item.jobTitle,
+        item.description,
         userText,
         item.status,
         item.priority,
@@ -183,13 +186,14 @@ export default function DashboardView() {
           <table className="w-full min-w-[850px] border-collapse text-left text-sm">
             <thead>
               <tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <th className="px-3 py-4">ID</th>
+                <th className="px-3 py-4">Ticket Number</th>
                 <th className="px-3 py-4">Title</th>
                 <th className="px-3 py-4">User</th>
                 <th className="px-3 py-4">Category</th>
                 <th className="px-3 py-4">Priority</th>
                 <th className="px-3 py-4">Status</th>
                 <th className="px-3 py-4">Created At</th>
+                <th className="px-3 py-4">Action</th>
               </tr>
             </thead>
 
@@ -237,11 +241,11 @@ export default function DashboardView() {
                     className="transition hover:bg-slate-50"
                   >
                     <td className="whitespace-nowrap px-3 py-4 font-semibold text-slate-800">
-                      #{item.id}
+                      #{item.ticketNumber}
                     </td>
 
                     <td className="px-3 py-4 font-medium text-slate-800">
-                      {item.jobTitle ?? 'Untitled ticket'}
+                      {item.description ?? 'Untitled ticket'}
                     </td>
 
                     <td className="px-3 py-4 text-slate-600">
@@ -274,6 +278,12 @@ export default function DashboardView() {
                       {createdAt
                         ? new Date(createdAt).toLocaleDateString()
                         : '—'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-slate-500">
+                      <button onClick={() => deleteTicket(String(item.id))}
+                        style={{ marginRight: '10px', padding: '6px 12px', background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>
+                        delete
+                      </button>
                     </td>
                   </tr>
                 );

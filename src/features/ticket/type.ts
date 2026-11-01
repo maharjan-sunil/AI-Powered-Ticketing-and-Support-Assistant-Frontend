@@ -1,9 +1,12 @@
 export interface Ticket {
   id: string;
-  jobTitle: string;
+  ticketNumber?: string
+  description: string;
   user: string;
   status: 'Open' | 'In Progress' |'Resolved' | 'Closed' | string;
   priority: 'Low' | 'Medium' | 'High' | string;
+  category: 'Account' | 'Billing' | 'Network' | string;
+  createdDate? : string
 }
 
 export interface TicketFormData {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
 import { apiClient } from '../../../api/apiClient';
 
+// import { useNavigate } from 'react-router-dom';
 import { Ticket} from '../type';
 
 
@@ -22,9 +23,10 @@ interface TicketContextType {
   updateStatus: (ticketId: string) => void;
   updateTicket: (ticketId: string, updateData: Partial<Ticket>) => void;
   deleteTicket: (ticketId: string) => Promise<void>;
-  dispatch: React.Dispatch<ReducerAction>; 
+  dispatch: React.Dispatch<ReducerAction>;
 }
 
+// const navigate = useNavigate();
 
 const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
@@ -51,15 +53,15 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 export function TicketProvider({ children }: {children: React.ReactNode}) {
   // Keep your tickets useState just like you had it!
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  
+
   // Set up the useReducer here so 'dispatch' is available above the useEffect
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // Fetch data on load
   useEffect(() => {
     dispatch({ type: 'FETCH_TICKETS' });
-    
-    apiClient.get('product')
+
+    apiClient.get('ticket')
       .then((response : { data: Ticket[] }) => {
         setTickets(response.data || []);
       })
@@ -72,27 +74,42 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
   }, []);
 
   // Action: Add Ticket
-  const handleAddTicket = (typedTitle: string) => {
-    const newTicket = {
-      id: Date.now().toString(),
-      jobTitle: typedTitle,
-      user: "System Admin",
-      status: "Open",
-      priority: "Medium"
-    };
-    setTickets((prev : Ticket[]) => [...prev, newTicket]);
+  const handleAddTicket = async (typedTitle: string) => {
+
+  const newTicket = {
+    ticketMessage: typedTitle
   };
 
+  try {
+    const response = await apiClient.post(`ticket/`, newTicket);
+
+    if (response && response.data) {
+      setTickets((prev: Ticket[]) => [...prev, response.data]);
+    }
+  } catch (error) {
+    console.error("Error creating ticket:", error);
+  }
+};
+
+
   // Action: Update Ticket
-  const handleUpdateTicket =  (ticketId: string, updateData: Partial<Ticket>) => {
+  const handleUpdateTicket = async (ticketId: string, updateData: Partial<Ticket>) => {
+
+    const updateTicket = {
+      ticketId: ticketId,
+      ticketMessage: updateData.description
+    };
+
     try {
-      //apiClient.put(`/product/${ticketId}`).then((response) => {
-      console.log(`Ticket ${ticketId} updated with data:`, updateData);   
-      }
-    catch (error) {
+      await apiClient.patch(`/ticket`, updateTicket).then((response) =>{
+        if(response.status === 200)
+          console.log("updated");
+      })
+    } catch (error) {
       console.error("Error updating ticket:", error);
     }
-  }
+  };
+
 
   // Action: Delete Ticket
   const handleDeleteTicket = async (ticketId : string) => {
@@ -107,9 +124,9 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
   setTickets((prev) => prev.filter((t) => t.id !== ticketId));
 
   try {
-    await apiClient.delete(`/product/${ticketId}`);
+    await apiClient.delete(`/ticket/${ticketId}`);
   } catch (error) {
-   
+
     alert("Failed to delete. Restoring item.");
 
     setTickets(originalTickets);
