@@ -222,8 +222,7 @@ export default function DashboardView() {
 
                 return (
                   <tr
-                    key={item.id}
-                    onClick={() => navigate(`/ticket/${item.id}`)}
+                    key={item.id}                   
                     className="transition hover:bg-slate-50"
                   >
                     <td className="whitespace-nowrap px-3 py-4 font-semibold text-slate-800">
@@ -269,6 +268,10 @@ export default function DashboardView() {
                       <button onClick={() => deleteTicket(String(item.id))}
                         style={{ marginRight: '10px', padding: '6px 12px', background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>
                         delete
+                      </button>
+                      <button onClick={() => navigate(`/ticket/${item.id}`)}
+                        style={{ padding: '6px 12px', background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>
+                        view
                       </button>
                     </td>
                   </tr>
