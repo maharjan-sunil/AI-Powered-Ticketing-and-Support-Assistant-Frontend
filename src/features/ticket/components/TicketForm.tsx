@@ -10,14 +10,24 @@ export default function TicketForm({
   onSuccess,
 }: TicketFormProps) {
 
-  const { register, handleSubmit, formState: { errors } } = useForm<TicketFormData>({ mode: 'all' });
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<TicketFormData>({ mode: 'all' });
   const [description, setDescription] = useState('');
   const { addTicket, updateTicket } = useTickets();
 
 
   useEffect(() => {
-    setDescription(isEditMode && initialData ? initialData.description : '');
-  }, [isEditMode, initialData]);
+  if (isEditMode && initialData) {
+    // Pass a clean object where the key matches your field name
+    reset({
+      description: initialData.description
+    });
+  } else {
+    reset({
+      description: '',
+    });
+  }
+}, [isEditMode, initialData, reset]);
+
 
   const handleClear = () => {
     setDescription(isEditMode && initialData ? initialData.description : '');

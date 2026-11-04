@@ -84,16 +84,25 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
     const response = await apiClient.post(`ticket/`, newTicket);
 
     if (response && response.data) {
-      setTickets((prev: Ticket[]) => [...prev, response.data]);
+      setTickets((prev: Ticket[]) => [response.data, ...prev]);
+      toast.success("Ticket created successfully!");
     }
   } catch (error) {
-    console.error("Error creating ticket:", error);
+    toast.error("Failed to create ticket.");
   }
 };
 
 
   // Action: Update Ticket
   const handleUpdateTicket = async (ticketId: string, updateData: Partial<Ticket>) => {
+    
+    //check before sending request
+    const ticketDescription = tickets.find((t) => t.id === ticketId)?.description;
+
+    if(ticketDescription === updateData.description) {
+      toast.error("No changes detected. Update aborted.");
+      return;
+    }
 
     const updateTicket = {
       ticketId: ticketId,
@@ -102,8 +111,12 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
 
     try {
       await apiClient.patch(`/ticket`, updateTicket).then((response) =>{
-        if(response.status === 200)
+        if(response.status === 200){
+          ticketDescription && setTickets((prev) =>
+            prev.map((t) => (t.id === ticketId ? { ...t, description: updateData.description || t.description } : t))
+          );
           toast.success("Ticket updated successfully!");
+        }
       })
     } catch (error) {
       toast.error("Failed to update ticket.");  
@@ -133,7 +146,7 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
 };
 
 
-  // Action: Update Status of the Ticket
+  // Action: Update Status of the Ticket (e.g., mark as Resolved)
   const handleUpdateStatus = (ticketId : string) => {
     setTickets((prev) =>
       prev.map((t) => (t.id === ticketId ? { ...t, status: 'Resolved' } : t))
