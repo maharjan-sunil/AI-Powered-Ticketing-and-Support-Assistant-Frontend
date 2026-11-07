@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 
 import { useTickets } from '../context/TicketContext';
 import { TicketFormProps, TicketFormData } from '../type';
@@ -16,16 +17,16 @@ export default function TicketForm({
 
 
   useEffect(() => {
-  if (isEditMode && initialData) {
-    reset({
-      description: initialData.description
-    });
-  } else {
-    reset({
-      description: '',
-    });
-  }
-}, [isEditMode, initialData, reset]);
+    if (isEditMode && initialData) {
+      reset({
+        description: initialData.description
+      });
+    } else {
+      reset({
+        description: '',
+      });
+    }
+  }, [isEditMode, initialData, reset]);
 
 
   const handleClear = () => {
@@ -55,6 +56,7 @@ export default function TicketForm({
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-2xl text-blue-600">
           ▤
         </span>
+
         <div>
           <h2 className="text-lg font-bold text-slate-900">
             {isEditMode ? 'Update Support Ticket' : 'Create a Support Ticket'}
@@ -65,6 +67,15 @@ export default function TicketForm({
               : 'Fill in the details below to create a new ticket.'}
           </p>
         </div>
+
+        {isEditMode && (
+          <Link
+            to="/"
+            className="ml-auto text-sm text-blue-500 hover:underline"
+          >
+            &larr; Back to Dashboard
+          </Link>
+        )}
       </div>
 
       {/* Form */}
@@ -81,7 +92,7 @@ export default function TicketForm({
             name="description"
             onChange={(e) => {
               register('description').onChange(e);
-              setDescription(e.target.value);     
+              setDescription(e.target.value);
             }}
             aria-label="Ticket description"
             className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
