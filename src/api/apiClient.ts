@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useLoadingStore } from '../store/loading';
 
 export const apiClient = axios.create({
   timeout: 100000, 
@@ -7,8 +8,24 @@ export const apiClient = axios.create({
   }
 });
 
-// Defer reading the env variable until the request actually leaves the browser
 apiClient.interceptors.request.use((config) => {
   config.baseURL = import.meta.env.VITE_API_BASE_URL;
+  useLoadingStore.getState().startLoading();
+  
   return config;
+}, (error) => {
+  useLoadingStore.getState().stopLoading();
+  return Promise.reject(error);
 });
+
+
+apiClient.interceptors.response.use(
+  (response) => {
+    useLoadingStore.getState().stopLoading();
+    return response;
+  },
+  (error) => {
+    useLoadingStore.getState().stopLoading();
+    return Promise.reject(error);
+  }
+);
