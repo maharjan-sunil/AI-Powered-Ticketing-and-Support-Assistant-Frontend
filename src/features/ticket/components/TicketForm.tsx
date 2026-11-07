@@ -12,12 +12,11 @@ export default function TicketForm({
 
   const { register, reset, handleSubmit, formState: { errors } } = useForm<TicketFormData>({ mode: 'all' });
   const [description, setDescription] = useState('');
-  const { addTicket, updateTicket } = useTickets();
+  const { loading, addTicket, updateTicket } = useTickets();
 
 
   useEffect(() => {
   if (isEditMode && initialData) {
-    // Pass a clean object where the key matches your field name
     reset({
       description: initialData.description
     });

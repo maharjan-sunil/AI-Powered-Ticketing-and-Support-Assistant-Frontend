@@ -21,9 +21,10 @@ interface TicketContextType {
   isLoading: boolean;
   error: string | null;
   addTicket: (typedTitle: string) => void;
-  updateStatus: (ticketId: string) => void;
+  // updateStatus: (ticketId: string) => void;
   updateTicket: (ticketId: string, updateData: Partial<Ticket>) => void;
   deleteTicket: (ticketId: string) => Promise<void>;
+  updateTicketStatus: (ticketId: string, newStatus: string) => Promise<string | undefined>;
   dispatch: React.Dispatch<ReducerAction>;
 }
 
@@ -147,10 +148,34 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
 
 
   // Action: Update Status of the Ticket (e.g., mark as Resolved)
-  const handleUpdateStatus = (ticketId : string) => {
-    setTickets((prev) =>
-      prev.map((t) => (t.id === ticketId ? { ...t, status: 'Resolved' } : t))
-    );
+  const handleUpdateStatus = async (ticketId: string, newStatus: string) => {
+    //check before sending request
+    const status = tickets.find((t) => t.id === ticketId)?.status;
+
+    if (status === newStatus) {
+      toast.error("No changes detected. Update aborted.");
+      return status;
+    }
+
+    // const updateTicketStatus = {
+    //   ticketId: ticketId,
+    //   ticketStatus: newStatus
+    // };
+
+    try {
+      var response = await apiClient.patch(`/ticket/status?ticketId=${ticketId}&ticketStatus=${newStatus}`);
+        if (response.status === 200) {
+          setTickets((prev) =>
+            prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t))
+          )
+          toast.success("Status updated successfully!");
+          return newStatus; // Return the new status to update the local state in TicketDetailView
+        }
+      }
+     catch (error) {
+      toast.error("Failed to update ticket.");
+    }
+    return status; // Return the original status if the update fails
   };
 
   // Bundle everything together to broadcast to your app
@@ -159,9 +184,10 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
     isLoading: state.isLoading, // Now you can pass loading state to your components!
     error: state.error,         // Now you can pass error state to your components!
     addTicket: handleAddTicket,
-    updateStatus: handleUpdateStatus,
+    // updateStatus: handleUpdateStatus,
     updateTicket: handleUpdateTicket, // Expose update function to child components
     deleteTicket: handleDeleteTicket, // Expose delete function to child components
+    updateTicketStatus: handleUpdateStatus, // Expose status update function to child components
     dispatch // Expose dispatch so child components can trigger state changes
   };
 

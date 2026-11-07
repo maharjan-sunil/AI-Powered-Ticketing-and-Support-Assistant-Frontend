@@ -8,10 +8,14 @@ import { Ticket } from '../type';
 
 export default function TicketDetailView() {
 
-  const { id } = useParams<{ id: string }>(); 
+  const { id } = useParams() as { id: string };
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-  const { isLoading, error, dispatch } = useTickets();
+  const { isLoading, error, updateTicketStatus, dispatch } = useTickets();
+
+  // const [isEditing, setIsEditing] = useState(false);
+  const [currentTicketStatus, setCurrentTicketStatus] = useState<string>();
+  const statusOptions = ['Open', 'In Progress', 'Resolved', 'Closed'];
 
   useEffect(() => {
     dispatch({ type: 'FETCH_TICKETS' });
@@ -19,6 +23,7 @@ export default function TicketDetailView() {
     apiClient.get(`ticket/search?ticketId=${id}`)
       .then((response) => {
         setTicket(response.data);
+        setCurrentTicketStatus(response.data.status);
         dispatch({ type: 'PROCESSING_COMPLETED' });
       })
       .catch((err) => {
@@ -31,13 +36,22 @@ export default function TicketDetailView() {
     setActiveTicketId(ticketId);
   };
 
+  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value;
+    const newStatusValue = await updateTicketStatus(id, newStatus);
+    console.log(`New status value returned from context: ${newStatusValue}`);
+    setCurrentTicketStatus(newStatusValue);
+    // setIsEditing(false);
+  };
+
+
   // FIXED: Explicitly added string typing to tracking string argument
   const handleFormSuccess = (updatedTitle: string) => {
     setTicket((prevTicket) => {
       // FIXED: Safeguarded against null to fix target payload mismatch errors
-      if (!prevTicket) return null; 
+      if (!prevTicket) return null;
       return {
-        ...prevTicket, 
+        ...prevTicket,
         description: updatedTitle
       };
     });
@@ -47,9 +61,9 @@ export default function TicketDetailView() {
   if (isLoading) return <div>⏳ Loading tickets, please wait...</div>;
   if (error) return <div>❌ Error: {error}</div>;
 
-  if (!ticket) return 
-    <p>System Profile Error: Target ID {id} not found. 
-  <Link to="/">Return home</Link></p>;
+  if (!ticket) return
+  <p>System Profile Error: Target ID {id} not found.
+    <Link to="/">Return home</Link></p>;
 
   return (
     <div>
@@ -63,15 +77,47 @@ export default function TicketDetailView() {
           <div style={{ lineHeight: '1.8' }}>
             <p><strong>Message:</strong> {ticket.description}</p>
             <p><strong>Assigned Engineer:</strong> {ticket.user || 'Unassigned'}</p>
-            <p><strong>Status:</strong> <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#e0f7fa' }}>{ticket.status}</span></p>
+
+            {/* Replaced <p> with <div> to allow nesting, matching line height with leading-loose */}
+            <div className="flex items-center gap-2 font-sans leading-loose">
+              <strong className="text-sm font-semibold text-gray-600">Status:</strong>
+
+              {/* Relative wrapper keeps the content size locked */}
+              <div className="relative inline-block">
+
+                {/* Beautiful Visual Badge */}
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-4 py-1.5 text-sm font-semibold text-cyan-800 shadow-sm">
+                  {currentTicketStatus}
+                  <span className="ml-0.5 h-0 w-0 border-x-4 border-t-4 border-x-transparent border-t-cyan-800" />
+                </span>
+
+                {/* Invisible Native Select layered perfectly on top */}
+                <select
+                  value={currentTicketStatus}
+                  onChange={handleStatusChange}
+                  className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                  title="Click to change status"
+                >
+                  {statusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+            </div>
+
             <p><strong>Priority:</strong> {ticket.priority}</p>
+            <p><strong>Category:</strong> {ticket.category}</p>
           </div>
+
         </div>}
       <div>
         {activeTicketId && (
           <TicketForm
-            isEditMode={true} 
-            initialData={ticket} 
+            isEditMode={true}
+            initialData={ticket}
             onSuccess={handleFormSuccess}
           />
         )}
