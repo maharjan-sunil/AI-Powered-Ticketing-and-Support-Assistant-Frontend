@@ -1,25 +1,53 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useTickets } from '../context/TicketContext';
 import TicketSearch, {
   type StatusFilter,
 } from '../components/TicketSearch';
 import TicketForm from '../components/TicketForm';
-import {DisplayTicket, StatCardProps} from '../type';
+import { DisplayTicket, StatCardProps } from '../type';
+
+import { useTicketsQuery, useDeleteTicketMutation } from '../hooks/useTicketsQuery';
+import Pagination from '../../../components/layout/PaginationLayout';
 
 
 export default function DashboardView() {
-  const { tickets, isLoading, error, deleteTicket } = useTickets();
 
-  // const createTicketRef = useRef<HTMLElement | null>(null);
   const navigate = useNavigate();
+
+  // 1. Add page state
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('All');
 
+  // 2. Pass dynamic `page` and destructure `data` + `isPlaceholderData`
+  const {
+    data,
+    isPending,
+    isPlaceholderData,
+    error,
+  } = useTicketsQuery({ page, pageSize });
+
+  const tickets = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const totalCount = data?.totalCount ?? 0;
+
+  // 3. Reset to page 1 when filters change
+  // const handleStatusChange = (newStatus: StatusFilter) => {
+  //   setStatus(newStatus);
+  //   setPage(1);
+  // };
+
+  // const handleQueryChange = (newQuery: string) => {
+  //   setQuery(newQuery);
+  //   setPage(1);
+  // };
+
   // const formInputRef = useRef<HTMLInputElement | null>(null);
 
+  const deleteTicketMutation = useDeleteTicketMutation();
   const ticketStats = useMemo(
     () => ({
       total: tickets.length,
@@ -75,7 +103,17 @@ export default function DashboardView() {
     });
   }, [tickets, query, status]);
 
-  if (isLoading) {
+  const deleteTicket = (ticketId: string) => {
+    const confirmation = window.prompt(
+      "Are you sure you want to delete this ticket? Type 'DELETE' to confirm."
+    );
+    if (confirmation !== 'DELETE') {
+      return;
+    }
+    deleteTicketMutation.mutate(ticketId);
+  }
+
+  if (isPending) {
     return (
       <div className="flex min-h-64 items-center justify-center text-slate-500">
         Loading support tickets...
@@ -89,7 +127,7 @@ export default function DashboardView() {
         role="alert"
         className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
       >
-        Unable to load tickets: {error}
+        Unable to load tickets: {error.message}
       </div>
     );
   }
@@ -222,7 +260,7 @@ export default function DashboardView() {
 
                 return (
                   <tr
-                    key={item.id}                   
+                    key={item.id}
                     className="transition hover:bg-slate-50"
                   >
                     <td className="whitespace-nowrap px-3 py-4 font-semibold text-slate-800">
@@ -308,12 +346,20 @@ export default function DashboardView() {
             </div>
           )}
         </div>
+        <Pagination
+          page={data?.page ?? page}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          hasPrevious={Boolean(data?.hasPrevious)}
+          hasNext={Boolean(data?.hasNext)}
+          isPlaceholderData={isPlaceholderData}
+          itemLabel="tickets"
+          onPageChange={setPage}
+        />
       </section>
     </main>
   );
 }
-
-
 
 function StatCard({
   title,
