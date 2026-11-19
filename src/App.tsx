@@ -11,17 +11,21 @@ import AdminLayout from './components/layout/AdminLayout';
 import DashboardView from './features/ticket/pages/DashboardView';
 import TicketDetailView from './features/ticket/pages/TicketDetailView';
 
-import { TicketProvider } from './features/ticket/context/TicketContext';
+// import { TicketProvider } from './features/ticket/context/TicketContext';
 
 import { useLoadingStore } from './store/loading'; // Adjust path if needed
 import './App.css';
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export default function App() {
 
   const isLoading = useLoadingStore((state) => state.isLoading);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
 
       {isLoading && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-auto">
@@ -30,21 +34,23 @@ export default function App() {
         </div>
       )}
 
-      <TicketProvider>
-        <Routes>
-          <Route element={<AdminLayout />}>
-            <Route path="/" element={<DashboardView />} />
+      <QueryClientProvider client={queryClient}>
+        {/* <TicketProvider> */}
+          <Routes>
+            <Route element={<AdminLayout />}>
+              <Route path="/" element={<DashboardView />} />
+              <Route
+                path="/ticket/:id"
+                element={<TicketDetailView />}
+              />
+            </Route>
             <Route
-              path="/ticket/:id"
-              element={<TicketDetailView />}
+              path="*"
+              element={<Navigate to="/" replace />}
             />
-          </Route>
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
-        </Routes>
-      </TicketProvider>
+          </Routes>
+        {/* </TicketProvider> */}
+      </QueryClientProvider>
       <Toaster
         position="top-right"
         reverseOrder={false}
