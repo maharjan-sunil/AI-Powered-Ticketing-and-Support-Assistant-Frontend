@@ -1,3 +1,18 @@
+export interface TicketListParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface PaginatedTicketsResponse {
+  items: Ticket[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface Ticket {
   id: string;
   ticketNumber?: string

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
-import { useTickets } from '../context/TicketContext';
+import {
+  useAddTicketMutation,
+  useUpdateTicketMutation,
+} from '../hooks/useTicketsQuery';
 import { TicketFormProps, TicketFormData } from '../type';
 
 export default function TicketForm({
@@ -10,27 +13,30 @@ export default function TicketForm({
   initialData = null,
   onSuccess,
 }: TicketFormProps) {
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<TicketFormData>({
+    mode: 'all',
+    values: {
+      description: isEditMode && initialData ? initialData.description : '',
+    },
+    // Uncomment the following line if you want to keep dirty values when resetting the form
+    // resetOptions: {
+    //   keepDirtyValues: true,
+    // }
+  });
 
-  const { register, reset, handleSubmit, formState: { errors } } = useForm<TicketFormData>({ mode: 'all' });
-  const [description, setDescription] = useState('');
-  const { loading, addTicket, updateTicket } = useTickets();
+  const addTicketMutation = useAddTicketMutation();
+  const updateTicketMutation = useUpdateTicketMutation();
 
-
-  useEffect(() => {
-    if (isEditMode && initialData) {
-      reset({
-        description: initialData.description
-      });
-    } else {
-      reset({
-        description: '',
-      });
-    }
-  }, [isEditMode, initialData, reset]);
-
+  const isSubmitting =
+    addTicketMutation.isPending || updateTicketMutation.isPending;
 
   const handleClear = () => {
-    setDescription(isEditMode && initialData ? initialData.description : '');
+    reset();
   };
 
   const handleSubmitData = (data: TicketFormData) => {
@@ -38,11 +44,26 @@ export default function TicketForm({
     if (!value) return;
 
     if (isEditMode && initialData) {
-      updateTicket(initialData.id, { description: value });
-      onSuccess?.(value);
+      if (initialData.description === value) {
+        toast.error('No changes detected. Update aborted.');
+        return;
+      }
+
+      updateTicketMutation.mutate(
+        { ticketId: initialData.id, description: value },
+        {
+          onSuccess: () => {
+            onSuccess?.(value);
+          },
+        }
+      );
     } else {
-      addTicket(value);
-      setDescription('');
+      addTicketMutation.mutate(value, {
+        onSuccess: () => {
+          reset();
+          onSuccess?.(value);
+        },
+      });
     }
   };
 
@@ -88,30 +109,33 @@ export default function TicketForm({
             {...register('description', { required: true })}
             type="text"
             placeholder="Enter ticket description..."
-            value={description}
-            name="description"
-            onChange={(e) => {
-              register('description').onChange(e);
-              setDescription(e.target.value);
-            }}
+            disabled={isSubmitting}
             aria-label="Ticket description"
-            className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
           />
 
           <button
             type="submit"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={isSubmitting}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="text-lg leading-none" aria-hidden="true">
               {isEditMode ? '✓' : '+'}
             </span>
-            {isEditMode ? 'Update Ticket' : 'Create Ticket'}
+            {isSubmitting
+              ? isEditMode
+                ? 'Updating...'
+                : 'Creating...'
+              : isEditMode
+                ? 'Update Ticket'
+                : 'Create Ticket'}
           </button>
 
           <button
             type="button"
             onClick={handleClear}
-            className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            disabled={isSubmitting}
+            className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
           >
             {isEditMode ? 'Reset' : 'Clear'}
           </button>
